@@ -22,4 +22,3 @@ uint16_t checksum16(void *data, size_t len) {
   // One's comp
   return ~sum;
 }
-
