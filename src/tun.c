@@ -9,7 +9,7 @@
 
 int tun_create(const char *name) {
   struct ifreq ifr;
-  int fd = open("dev/net/tun", O_RDWR);
+  int fd = open("/dev/net/tun", O_RDWR);
   if (fd < 0) return -1;
 
   // Clear ifr to avoid unexpected behavior due to union

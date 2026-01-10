@@ -3,7 +3,7 @@
 *.a
 *.so
 *.out
-tcpip
+bananatcp
 
 *.dSYM/
 *.gdb
