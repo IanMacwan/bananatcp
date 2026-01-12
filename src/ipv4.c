@@ -35,21 +35,16 @@ void ipv4_handle(packet_t *pkt) {
     return;
   }
 
-  // Log the basic info
-    struct in_addr src, dst;
-    src.s_addr = hdr->src_ip;
-    dst.s_addr = hdr->dst_ip;
-    printf("🌴 ipv4: received packet from %s to %s, protocol=%u, payload=%zu bytes\n", inet_ntoa(src), inet_ntoa(dst), hdr->protocol, packet_remaining(pkt));
-
   switch (hdr->protocol) {
     case 1:
       icmp_handle(pkt, hdr);
       break;
-    case 16:
+    case 6:
       tcp_handle(pkt, hdr);
       break;
     case 17:
-      udp_handle(pkt, hdr);     
+      udp_handle(pkt, hdr);
+      break;
     default:
       printf("❓ ipv4: unsupported protocol %u\n", hdr->protocol);
       break;

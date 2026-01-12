@@ -1,18 +1,19 @@
-#include "../include/tcp.h"
+#include "../include/udp.h"
+#include <arpa/inet.h>
 #include <stdio.h>
 
 typedef struct {
     uint16_t src_port;
     uint16_t dst_port;
-    uint32_t seq;
-    uint32_t ack;
-    uint8_t  offset;
-    uint8_t  flags;
-    uint16_t window;
+    uint16_t length;
     uint16_t checksum;
-    uint16_t urg_ptr;
-} __attribute__((packed)) tcp_hdr_t;
+} __attribute__((packed)) udp_hdr_t;
 
-void tcp_handle(packet_t *pkt, void *ip_hdr) {
-    return;
+void udp_handle(packet_t *pkt, void *ip_hdr) {
+  
+  udp_hdr_t *udp = packet_pull(pkt, sizeof(udp_hdr_t));
+  if (!udp) return;
+
+  uint16_t port = ntohs(udp->dst_port);
+  printf("🙊 udp: packet to port %u (%zu bytes payload)\n", port, packet_remaining(pkt));
 }
