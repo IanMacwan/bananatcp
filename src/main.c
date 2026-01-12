@@ -5,6 +5,34 @@
 #include <stdio.h>
 
 int main() {
+  printf("\033[33m");
+  printf(
+    " _\n"
+    "//\\\n"
+    "V  \\\n"
+    " \\  \\_\n"
+    "  \\,'.`-."
+  );
+  printf("\033[31m");
+  printf("           bananatcp\n");
+  printf("\033[33m");
+  printf(
+    "   |\\ `. `."
+  );
+  printf("\033[31m");
+  printf("   userspace tcp/ip stack\n");
+  printf("\033[33m");
+  printf(
+    "   ( \\  `. `-.                        _,.-:\\\n"
+    "    \\ \\   `.  `-._             __..--' ,-';/\n"
+    "     \\ `.   `-.   `-..___..---'   _.--' ,'/\n"
+    "      `. `.    `-._        __..--'    ,' /\n"
+    "        `. `-_     ``--..''       _.-' ,'\n"
+    "          `-_ `-.___        __,--'   ,'\n"
+    "             `-.__  `----\"\"\"    __.-'\n"
+    "                  `--..____..--'\n\n"
+  );
+  printf("\033[0m");
 
   int tun = tun_create("bananatun0");
   if (tun < 0) {
