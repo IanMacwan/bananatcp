@@ -14,5 +14,9 @@ typedef struct {
 } __attribute__((packed)) tcp_hdr_t;
 
 void tcp_handle(packet_t *pkt, void *ip_hdr) {
-    return;
+
+  tcp_hdr_t *tcp = packet_pull(pkt, sizeof(tcp_hdr_t));
+  if (!tcp) return;
+
+  printf("🙉 tcp: packet received (flags=0x%x)\n", tcp->flags);
 }
