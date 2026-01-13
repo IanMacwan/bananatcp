@@ -29,7 +29,7 @@ void tcp_init(void) {
 void tcp_send(packet_t *pkt, ipv4_hdr_t *ip_hdr, tcp_hdr_t *tcp) {
 
   ipv4_hdr_t *ip = (ipv4_hdr_t *)ip_hdr;
-
+  
   uint16_t tmp = tcp->src_port;
   tcp->src_port = tcp->dst_port;
   tcp->dst_port = tmp;
@@ -47,6 +47,15 @@ void tcp_send(packet_t *pkt, ipv4_hdr_t *ip_hdr, tcp_hdr_t *tcp) {
 void tcp_handle(packet_t *pkt, void *ip_hdr) {
     tcp_hdr_t *tcp = packet_pull(pkt, sizeof(tcp_hdr_t));
     if (!tcp) return;
+    
+    if (conn.state == TCP_IGNORE) {
+      if (tcp->flags & TCP_SYN) {
+        // new connection attempt
+        conn.state = TCP_LISTEN;
+      } else {
+        return; // ignore everything else
+      }
+    }
 
     uint16_t src_port = ntohs(tcp->src_port);
     uint16_t dst_port = ntohs(tcp->dst_port);
@@ -58,74 +67,77 @@ void tcp_handle(packet_t *pkt, void *ip_hdr) {
     switch (conn.state) {
 
     case TCP_LISTEN:
-        if (tcp->flags & TCP_SYN) {
-            ipv4_hdr_t *ip = (ipv4_hdr_t *)ip_hdr;
+      if (tcp->flags & TCP_SYN) {
+        ipv4_hdr_t *ip = (ipv4_hdr_t *)ip_hdr;
 
-            conn.src_ip   = ip->dst_ip;
-            conn.dst_ip   = ip->src_ip;
-            conn.src_port = dst_port;
-            conn.dst_port = src_port;
+        conn.src_ip   = ip->dst_ip;
+        conn.dst_ip   = ip->src_ip;
+        conn.src_port = dst_port;
+        conn.dst_port = src_port;
 
-            conn.state = TCP_SYN_RECEIVED;
-            conn.rcv_nxt = seq + 1;
-            conn.snd_nxt = 1000; // arbitrary initial seq
+        conn.state = TCP_SYN_RECEIVED;
+        conn.rcv_nxt = seq + 1;
+        conn.snd_nxt = 1000; // arbitrary initial seq
 
-            tcp->flags = TCP_SYN | TCP_ACK;
-            tcp->ack = htonl(conn.rcv_nxt);
-            tcp->seq = htonl(conn.snd_nxt);
+        tcp->flags = TCP_SYN | TCP_ACK;
+        tcp->ack = htonl(conn.rcv_nxt);
+        tcp->seq = htonl(conn.snd_nxt);
 
-            tcp_send(pkt, ip_hdr, tcp);
+        tcp_send(pkt, ip_hdr, tcp);
 
-            conn.snd_nxt += 1;
-        }
-        break;
+        conn.snd_nxt += 1;
+      }
+      break;
 
     case TCP_SYN_RECEIVED:
-        if (tcp->flags & TCP_ACK) {
-            conn.state = TCP_ESTABLISHED;
-            printf("🙉 tcp: connection established\n");
-        }
-        break;
+      if (tcp->flags & TCP_ACK) {
+        conn.state = TCP_ESTABLISHED;
+        printf("🙉 tcp: connection established\n");
+      }
+      break;
 
     case TCP_ESTABLISHED:
-        if (packet_remaining(pkt) > 0) {
-            printf("🙉 tcp: data received (%zu bytes)\n",
-                   packet_remaining(pkt));
+      if (packet_remaining(pkt) > 0) {
+        printf("🙉 tcp: data received (%zu bytes)\n",
+               packet_remaining(pkt));
 
-            conn.rcv_nxt += packet_remaining(pkt);
+        conn.rcv_nxt += packet_remaining(pkt);
 
-            tcp->flags = TCP_ACK;
-            tcp->ack = htonl(conn.rcv_nxt);
-            tcp->seq = htonl(conn.snd_nxt);
+        tcp->flags = TCP_ACK;
+        tcp->ack = htonl(conn.rcv_nxt);
+        tcp->seq = htonl(conn.snd_nxt);
 
-            tcp_send(pkt, ip_hdr, tcp);
-        }
+        tcp_send(pkt, ip_hdr, tcp);
+      }
 
-        if (tcp->flags & TCP_FIN) {
-            conn.state = TCP_CLOSE_WAIT;
-            conn.rcv_nxt += 1;
+      if (tcp->flags & TCP_FIN) {
+        
+        conn.state = TCP_CLOSE_WAIT;
+        conn.rcv_nxt += 1;
 
-            tcp->flags = TCP_ACK;
-            tcp->ack = htonl(conn.rcv_nxt);
-            tcp_send(pkt, ip_hdr, tcp);
-        }
-        break;
+        tcp->flags = TCP_ACK;
+        tcp->ack = htonl(conn.rcv_nxt);
+        tcp_send(pkt, ip_hdr, tcp);
+      }
+      break;
 
     case TCP_CLOSE_WAIT:
-        tcp->flags = TCP_FIN | TCP_ACK;
-        tcp->seq = htonl(conn.snd_nxt++);
-        tcp_send(pkt, ip_hdr, tcp);
-        conn.state = TCP_LAST_ACK;
-        break;
+      tcp->flags = TCP_FIN | TCP_ACK;
+      tcp->seq = htonl(conn.snd_nxt++);
+      tcp_send(pkt, ip_hdr, tcp);
+      conn.state = TCP_LAST_ACK;
+      break;
 
     case TCP_LAST_ACK:
-        if (tcp->flags & TCP_ACK) {
-            conn.state = TCP_CLOSED;
-            printf("🙉 tcp: connection closed\n");
-        }
-        break;
+      if (tcp->flags & TCP_ACK) {
+        conn.state = TCP_IGNORE;
+        printf("🙉 tcp: connection closed\n");
+        conn.snd_nxt = 0;
+        conn.rcv_nxt = 0;
+      }
+      break;
 
     default:
-        break;
+      break;
     }
 }

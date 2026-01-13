@@ -22,7 +22,8 @@ typedef enum {
     TCP_SYN_RECEIVED,
     TCP_ESTABLISHED,
     TCP_CLOSE_WAIT,
-    TCP_LAST_ACK
+    TCP_LAST_ACK,
+    TCP_IGNORE // TIME_WAIT implementation
 } tcp_state_t;
 
 void tcp_init(void);
