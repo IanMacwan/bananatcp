@@ -1,6 +1,7 @@
 #include "../include/tun.h"
 #include "../include/packet.h"
 #include "../include/ipv4.h"
+#include "../include/tcp.h"
 #include <unistd.h>
 #include <stdio.h>
 
@@ -43,6 +44,7 @@ int main() {
   }
 
   packet_t pkt;
+  tcp_init();
 
   while (1) {
 
