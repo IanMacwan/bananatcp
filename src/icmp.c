@@ -1,5 +1,6 @@
 #include "../include/icmp.h"
 #include "../include/checksum.h"
+#include "../include/ipv4.h"
 #include <string.h>
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -24,4 +25,6 @@ void icmp_handle(packet_t *pkt, void *ip_hdr) {
   icmp->checksum = checksum16(icmp, sizeof(icmp_hdr_t) + packet_remaining(pkt));
 
   printf("🙊 icmp: echo request received id=%u seq=%u\n", ntohs(icmp->id), ntohs(icmp->seq));
+
+  ipv4_send(pkt, ip_hdr);
 }

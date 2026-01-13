@@ -4,7 +4,10 @@
 #include "../include/tcp.h"
 #include "../include/checksum.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <arpa/inet.h>
+
+extern int tun_fd;
 
 typedef struct {
   uint8_t ver_ihl; // Verion and header lenght
@@ -51,3 +54,24 @@ void ipv4_handle(packet_t *pkt) {
   }
 }
 
+void ipv4_send(packet_t *pkt, void *hdr_ptr) {
+
+  ipv4_hdr_t *hdr = (ipv4_hdr_t *)hdr_ptr;
+  
+  // Swap source and destination IPs
+  uint32_t tmp = hdr->src_ip;
+  hdr->src_ip = hdr->dst_ip;
+  hdr->dst_ip = tmp;
+
+  // Reset TTL and recalc checksum
+  hdr->ttl = 64;
+  hdr->checksum = 0;
+  hdr->checksum = checksum16(hdr, sizeof(ipv4_hdr_t));
+
+  ssize_t n = write(tun_fd, pkt->buffer, pkt->len);
+  if (n < 0) {
+    perror("ipv4_send: write");
+  } else {
+    printf("🌴 ipv4: sent reply (%zd bytes)\n", n);
+  }
+}

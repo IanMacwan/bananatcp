@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
+int tun_fd;
+
 int main() {
   printf("\033[33m");
   printf(
@@ -34,8 +36,8 @@ int main() {
   );
   printf("\033[0m");
 
-  int tun = tun_create("bananatun0");
-  if (tun < 0) {
+  tun_fd = tun_create("bananatun0");
+  if (tun_fd < 0) {
     perror("tun error");
     return 1;
   }
@@ -44,7 +46,7 @@ int main() {
 
   while (1) {
 
-    ssize_t n = read(tun, pkt.buffer, PACKET_MAX_SIZE);
+    ssize_t n = read(tun_fd, pkt.buffer, PACKET_MAX_SIZE);
 
     if (n <= 0) continue;
 
