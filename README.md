@@ -63,10 +63,10 @@ make
 ```bash
 sudo ./bananatcp
 ```
-3. Configure the interface (example):
+3. Configure the interface in different terminal (example):
 ```bash
 sudo ip addr add 10.0.1.1/24 dev bananatun0
-sudo ip link set tun0 up
+sudo ip link set bananatun0 up
 sudo ip route add 10.0.1.2/32 dev bananatun0
 ```
 
