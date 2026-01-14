@@ -74,6 +74,7 @@ The stack was tested using standard Linux networking tools:
 - `ping` — verifies ICMP echo replies
 - `nc` (netcat) — validates TCP handshake, data transfer, and clean shutdown
 - `tcpdump` / Wireshark — confirms packet correctness on the wire
+
 All packets observed match expected protocol behavior and header semantics.
 
 > ⚠️ **Disclaimer**: This project is educational and not intended for production use (probably obvious). It prioritizes correctness, clarity, and learning over performance or security hardening.
