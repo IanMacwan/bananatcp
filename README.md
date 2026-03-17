@@ -2,7 +2,7 @@
 
 > A minimal userspace TCP/IP stack built from scratch in C, featuring IPv4 parsing, ICMP echo replies, and a functional TCP state machine running over a Linux TUN interface.
 
-![BananaTCP startup demo](start.png)
+![BananaTCP startup demo](images/start.png)
 
 ---
 ## Project Overview
