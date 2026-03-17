@@ -9,6 +9,11 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 
+void use_user_config(net_config *cfg, char *tun, char *peer) {
+  snprintf(cfg->tun_ip, sizeof(cfg->tun_ip), "%s/24", tun);
+  snprintf(cfg->peer_ip, sizeof(cfg->peer_ip), "%s/32", peer);
+}
+
 int tun_create(const char *name, net_config *cfg) {
   struct ifreq ifr;
   int fd = open("/dev/net/tun", O_RDWR);
