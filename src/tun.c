@@ -6,8 +6,10 @@
 #include <linux/if_tun.h>
 #include <string.h>
 #include <stdio.h>
+#include <ifaddrs.h>
+#include <arpa/inet.h>
 
-int tun_create(const char *name) {
+int tun_create(const char *name, net_config *cfg) {
   struct ifreq ifr;
   int fd = open("/dev/net/tun", O_RDWR);
   if (fd < 0) return -1;
