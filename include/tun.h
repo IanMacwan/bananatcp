@@ -15,6 +15,8 @@ void find_free_subnet(net_config *cfg);
 
 int run_cmd(char *argv[]);
 
-int tun_create(const char *name, net_config *cfg);
+void configure_interface(const char *dev, net_config *cfg);
+
+int tun_create(char *name, net_config *cfg);
 
 #endif
